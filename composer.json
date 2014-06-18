@@ -14,6 +14,9 @@
         "php": ">=5.3.0",
         "sybio/gif-creator": "1.0.0"
     },
+	"require-dev": {
+		"phpunit/phpunit": "4.*"
+	},
     "suggest": {
         "tedivm/stash": "Stash is required to utilise PHPVideoToolkits Default Cache class 'Cache_Stash', however you can build your own caching classes so that Stash is not required.",
         "monolog/monolog" : "Monolog is required to utilise PHPVideoToolkits Default Logging class 'Logger_Monolog', however you can build your own logger classes so that Monolog is not required."
@@ -23,5 +26,8 @@
             "PHPVideoToolkit\\": "src/",
             "FFmpeg-PHP\\": "emulators/ffmpeg-php/"
         }
-    }
+    },
+	"autoload-dev": {
+		"classmap": ["tests/"]
+	}
 }

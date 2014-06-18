@@ -1,5 +1,5 @@
 <?php
-    
+
     /**
      * This file is part of the PHP Video Toolkit v2 package.
      *
@@ -10,12 +10,12 @@
      * @version 2.1.7-beta
      * @uses ffmpeg http://ffmpeg.sourceforge.net/
      */
-     
+
     namespace PHPVideoToolkit;
 
     /**
      * This class provides generic data parsing for the output from FFmpeg from specific
-     * media files. Parts of the code borrow heavily from Jorrit Schippers version of 
+     * media files. Parts of the code borrow heavily from Jorrit Schippers version of
      * PHPVideoToolkit v 0.1.9.
      *
      * @access public
@@ -27,50 +27,52 @@
     {
         protected $_extracting_frames;
         protected $_extracting_frame;
-        
+
         protected $_extracting_audio;
-        
+
         public function __construct($video_file_path, Config $config=null, VideoFormat $video_input_format=null, $ensure_video_file=true)
         {
             parent::__construct($video_file_path, $config, $video_input_format);
-            
+
 //          validate this media file is a video file
             if($ensure_video_file === true && $this->_validateMedia('video') === false)
             {
-                throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
+                  throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file.');
+//FIXME $type - is undefined below
+//                throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
             }
-            
+
             $this->_extracting_frames = false;
             $this->_extracting_frame = false;
-            
+
             $this->_extracting_audio = false;
         }
-        
+
         public function getDefaultFormatClassName()
         {
             return 'VideoFormat';
         }
-        
+
         public function extractAudio()
         {
             $this->_extracting_audio = true;
-            
+
             return $this;
         }
-        
+
         public function extractFrame(Timecode $timecode)
         {
             if($this->_extracting_frames === true)
             {
                 throw new Exception('You cannot extract multiple frames and then extract a single frame in the same execution chain.');
             }
-            
+
             $this->extractSegment($timecode, $timecode);
             $this->_extracting_frame = true;
-            
+
             return $this;
         }
-        
+
         public function extractFrames(Timecode $from_timecode=null, Timecode $to_timecode=null, $force_frame_rate=null)
         {
             if($this->_extracting_frame === true)
@@ -81,30 +83,30 @@
             {
                 throw new Exception('If setting a forced frame rate please make sure it is either an integer, a float or a string in the "1/xxx" format (i.e. 1/60 = 1 frame every 60 seconds).');
             }
-            
+
             if($from_timecode !== null || $to_timecode !== null)
             {
                 $this->extractSegment($from_timecode, $to_timecode);
             }
             $this->_extracting_frames = $force_frame_rate === null ? true : $force_frame_rate;
-            
+
             return $this;
         }
-        
+
         protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
         {
             parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
-            
+
 //          if we are splitting the output
             if(empty($this->_split_options) === false)
             {
                 $options = $output_format->getFormatOptions();
-            
+
 //              if we are splitting we need to add certain commands to make it work.
 //              for video, we need to ensure that both audio and video codecs are set.
                 if($this->readHasAudio() === true && empty($options['audio_codec']) === true)
                 {
-                    $data = $this->readAudioComponent(); 
+                    $data = $this->readAudioComponent();
                     // TODO checks for empty name
                     // TODO check for encode availability
                     $this->_process->addCommand('-acodec', $data['codec']['name']);
@@ -118,19 +120,19 @@
                 }
             }
         }
-        
+
         /**
          * Process the output format just before the it is compiled into commands.
          *
          * @access public
          * @author Oliver Lillie
-         * @param Format &$output_format 
+         * @param Format &$output_format
          * @return void
          */
         protected function _processOutputFormat(Format &$output_format=null, &$save_path, $overwrite)
         {
             parent::_processOutputFormat($output_format, $save_path, $overwrite);
-            
+
 //          turn off the related options.
             if($this->_extracting_audio === true)
             {
@@ -140,7 +142,7 @@
             {
                 $output_format->disableAudio();
             }
-            
+
 //          check for conflictions with having both audio and video disabled.
             $options = $output_format->getFormatOptions();
             if($options['disable_audio'] === true && $options['disable_video'] === true)
@@ -163,7 +165,7 @@
                     // TODO change to log a warning instead
                     throw new Exception('You are attempting to extract a frame, however you have also specified a max frame limit in the video output format. When extracting a frame you cannot set the max frame limit of the output format. If you wish to extract multiple frames please use the extractFrames function instead.');
                 }
-                
+
                 $output_format->setVideoFrameRate(1);
                 $output_format->setVideoMaxFrames(1);
             }
@@ -179,7 +181,7 @@
                         // TODO change to log a warning instead
                         throw new Exception('You are attempting to extract multiple frames and force a frame rate, however you have also specified a frame rate in the video output format. When extracting multiple frames whilst specifying a forced frame rate you cannot set the frame rate of the output format.');
                     }
-                    
+
                     $output_format->setVideoFrameRate($this->_extracting_frames);
                 }
             }
@@ -236,7 +238,7 @@
                     }
                 }
             }
-            
+
 //          check the video dimensions to see if we need to post process the dimensions
             if(isset($options['video_dimensions']))
             {
@@ -249,7 +251,7 @@
                     {
                         $output_format->setVideoDimensions($optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
                     }
-                
+
 //                  check to see if we have to apply any padding.
                     if($optimal_dimensions['pad_top'] > 0 || $optimal_dimensions['pad_right'] > 0 || $optimal_dimensions['pad_bottom'] > 0 || $optimal_dimensions['pad_left'] > 0)
                     {
@@ -257,16 +259,16 @@
                     }
                 }
             }
-            
+
         }
-        
+
         /**
          * Takes in a set of video dimensions - original and target - and returns the optimal conversion
          * dimensions.  It will always return the smaller of the original or target dimensions.
          * For example: original dimensions of 320x240 and target dimensions of 640x480.
          * The result will be 320x240 because converting to 640x480 would be a waste of disk
          * space, processing, and bandwidth (assuming these videos are to be downloaded).
-         * 
+         *
          * @param $target_width:       The width of the video file which we will be converting to.
          * @param $target_height:      The height of the video file which we will be converting to.
          * @param $force_aspect:       Boolean value of whether or not to force conversion to the target's
@@ -297,10 +299,10 @@
             {
                 throw new Exception('Unable to read the videos dimensions.');
             }
-            
+
             $original_width = $dimensions['width'];
-            $original_height = $dimensions['height'];   
-            
+            $original_height = $dimensions['height'];
+
 //          Array to be returned by this function
             $target = array(
                 'padded_width' => $original_width,
@@ -331,7 +333,7 @@
                         $target_width = $original_width;
                         $target_height = round($raspect * $target_width);
                     }
-                    
+
 //                  Calculate height from width
                     $original_height = round($original_height / $original_width * $target_width);
                     $original_width = $target_width;
@@ -352,7 +354,7 @@
                         $target_height = $original_height;
                         $target_width = round($aspect * $target_height);
                     }
-                    
+
 //                  Calculate width from height
                     $original_width = round($original_width / $original_height * $target_height);
                     $original_height = $target_height;
@@ -384,7 +386,7 @@
                     }
                 }
             }
-            
+
 //          Use the target_ vars because they contain dimensions relative to the target aspect ratio
             if($force_aspect === true)
             {
@@ -396,16 +398,16 @@
                 $target['padded_width'] = $original_width;
                 $target['padded_height'] = $original_height;
             }
-            
+
             return $target;
         }
-        
+
         /**
          * Returns any video information about the file if available.
          *
          * @access public
          * @author Oliver Lillie
-         * @param boolean $read_from_cache 
+         * @param boolean $read_from_cache
          * @return mixed Returns an array of found data, otherwise returns null.
          */
         public function readDimensions($read_from_cache=true)
@@ -413,13 +415,13 @@
             $video_data = parent::readVideoComponent($read_from_cache);
             return $video_data['dimensions'];
         }
-        
+
         /**
          * Returns any video information about the file if available.
          *
          * @access public
          * @author Oliver Lillie
-         * @param boolean $read_from_cache 
+         * @param boolean $read_from_cache
          * @return mixed Returns an array of found data, otherwise returns null.
          */
         public function getFrameRate($read_from_cache=true)

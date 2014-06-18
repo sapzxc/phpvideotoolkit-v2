@@ -1,5 +1,5 @@
 <?php
-    
+
     /**
      * This file is part of the PHP Video Toolkit v2 package.
      *
@@ -10,7 +10,7 @@
      * @version 2.1.7-beta
      * @uses ffmpeg http://ffmpeg.sourceforge.net/
      */
-     
+
     namespace PHPVideoToolkit;
 
     /**
@@ -43,14 +43,14 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param  constant $input_output_type Determines the input/output type of the Format. Either PHPVideoToolkit\Format::INPUT 
+         * @param  constant $input_output_type Determines the input/output type of the Format. Either PHPVideoToolkit\Format::INPUT
          *  or PHPVideoToolkit\Format::OUTPUT
          * @param  PHPVideoToolkit\Config $config The config object.
          */
         public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($input_output_type, $config);
-            
+
             $this->_format = array_merge($this->_format, array(
                 'disable_audio' => false,
                 'audio_quality' => null,
@@ -73,20 +73,20 @@
                 ),
                 'audio_volume'              => '-af "volume=<setting>"',
             ));
-            
+
             $this->_restricted_audio_bitrates = null;
             $this->_restricted_audio_sample_frequencies = null;
             $this->_restricted_audio_codecs = null;
         }
-        
+
         /**
          * This is a hook function that is called when the PHPVideoToolkit\Media::_processOutputFormat function is run.
-         * This allows the format to update any commands in itself depending on other functions called within the Media object. 
+         * This allows the format to update any commands in itself depending on other functions called within the Media object.
          *
          * @access public
          * @author Oliver Lillie
          * @param string &$save_path The save path of the output media.
-         * @param  constant $overwrite The Media constant used to determine the overwrite status of the save. One of the 
+         * @param  constant $overwrite The Media constant used to determine the overwrite status of the save. One of the
          *  following constants:
          *  PHPVideoToolkit\Media::OVERWRITE_FAIL
          *  PHPVideoToolkit\Media::OVERWRITE_EXISTING
@@ -97,34 +97,34 @@
         public function updateFormatOptions(&$save_path, $overwrite)
         {
             parent::updateFormatOptions($save_path, $overwrite);
-            
+
             // TODO expand the video_filters format data
             if(empty($this->_format['audio_filters']) === false)
             {
-                
+
             }
 
             return $this;
         }
-        
+
         /**
          * Adds an audio filter to the audio filters list to be applied to the audio.
          *
          * @access public
          * @author Oliver Lillie
-         * @param AudioFilter $filter 
+         * @param AudioFilter $filter
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @todo Implement
          */
         public function addAudioFilter(AudioFilter $filter)
         {
             $this->_blockSetOnInputFormat('audio filter');
-            
+
             $this->_setFilter('audio_filters', $filter);
-            
+
             return $this;
         }
-        
+
         /**
          * Disables the audio stream of the input media in the output media.
          *
@@ -139,12 +139,12 @@
             {
                 throw new \LogicException('Audio cannot be disabled on an input '.get_class($this).'.');
             }
-            
+
             $this->_format['disable_audio'] = true;
-            
+
             return $this;
         }
-        
+
         /**
          * Enables the audio by disabling any previously set disableAudio call.
          *
@@ -155,13 +155,13 @@
         public function enableAudio()
         {
             $this->_format['disable_audio'] = false;
-            
+
             return $this;
         }
-        
+
         /**
          * Sets the audio codec for the audio stream. The audio codec must be one of the codecs given from
-         * PHPVideoToolkit\FfmpegParser::getCodecs or 'copy'. There are a few audio codecs that are automagically 
+         * PHPVideoToolkit\FfmpegParser::getCodecs or 'copy'. There are a few audio codecs that are automagically
          * corrected depending on their availability on the current system. These codecs are:
          * - mp3 and libmp3lame
          * - vorbis and libvorbis
@@ -169,8 +169,8 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $audio_codec 
-         * @return PHPVideoToolkit\AudioFormat Returns the current object.
+         * @param string $audio_codec
+         * @return \PHPVideoToolkit\AudioFormat $this Returns the current object.
          * @throws \InvalidArgumentException If a codec is not found.
          * @throws \InvalidArgumentException If a codec is not available in the restricted codecs array.
          */
@@ -181,12 +181,12 @@
                 $this->_format['audio_codec'] = null;
                 return $this;
             }
-            
+
 //          validate the audio codecs that are available from ffmpeg.
             $codecs = array_keys($this->getCodecs('audio'));
 //          special case for copy as it is not included in the codec list but is valid
             array_push($codecs, 'copy');
-            
+
 //          run a libmp3lame check as it require different mp3 codec
 //          updated. thanks to Varon for providing the research
             if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
@@ -203,12 +203,12 @@
             {
                 $audio_codec = in_array('libfdk_aac', $codecs) === true ? 'libfdk_aac' : 'aac';
             }
-            
+
             if(in_array($audio_codec, $codecs) === false)
             {
                 throw new \InvalidArgumentException('Unrecognised audio codec "'.$audio_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
             }
-            
+
 //          now check the class settings to see if restricted pixel formats have been set and have to be obeyed
             if($this->_restricted_audio_codecs !== null)
             {
@@ -217,37 +217,37 @@
                     throw new \InvalidArgumentException('The audio codec "'.$audio_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_audio_codecs));
                 }
             }
-            
+
             $this->_format['audio_codec'] = $audio_codec;
             return $this;
         }
-        
+
         /**
          * Sets the audio bit rate for the format.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $bitrate 
-         * @return PHPVideoToolkit\AudioFormat Returns the current object.
+         * @param string $bitrate
+         * @return \PHPVideoToolkit\AudioFormat $this Returns the current object.
          * @throws \InvalidArgumentException If the bitrate is not in one of the restricted bit rates, if any.
          * @todo expand out the shorthand notations of bitrates
          */
         public function setAudioBitrate($bitrate)
         {
             $this->_blockSetOnInputFormat('audio bitrate');
-            
+
             if($bitrate === null)
             {
                 $this->_format['audio_bitrate'] = null;
                 return $this;
             }
-            
+
 //          expand out any short hand
             if(preg_match('/^[0-9]+k$/', $bitrate) > 0)
             {
                 // TODO make this exapnd out the kbs values
             }
-            
+
 //          now check the class settings to see if restricted audio bitrates have been set and have to be obeys
             if($this->_restricted_audio_bitrates !== null)
             {
@@ -256,18 +256,18 @@
                     throw new \InvalidArgumentException('The bitrate "'.$bitrate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioBitrate. Please select one of the following bitrates: '.implode(', ', $this->_restricted_audio_bitrates));
                 }
             }
-            
+
             $this->_format['audio_bitrate'] = $bitrate;
             return $this;
         }
-        
+
         /**
          * Sets the audio sample frequency for the audio format.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $audio_sample_frequency 
-         * @return PHPVideoToolkit\AudioFormat Returns the current object.
+         * @param string $audio_sample_frequency
+         * @return \PHPVideoToolkit\AudioFormat $this Returns the current object.
          * @throws \InvalidArgumentException If the sample frequency is not an integer value.
          * @throws \InvalidArgumentException If the sample frequency is less than 0
          * @throws \InvalidArgumentException If the sample frequency is not in one of the restricted sample frequencies, if any.
@@ -287,7 +287,7 @@
             {
                 throw new \InvalidArgumentException('Unrecognised audio sample frequency "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioSampleFrequency');
             }
-            
+
 //          now check the class settings to see if restricted audio audio sample frequencies have been set and have to be obeyed
             if($this->_restricted_audio_sample_frequencies !== null)
             {
@@ -296,18 +296,18 @@
                     throw new \InvalidArgumentException('The audio sample frequency "'.$audio_sample_frequency.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioSampleFrequency. Please select one of the following sample frequencies: '.implode(', ', $this->_restricted_audio_sample_frequencies));
                 }
             }
-                
+
             $this->_format['audio_sample_frequency'] = $audio_sample_frequency;
             return $this;
         }
-        
+
         /**
-         * Sets the number of available audio channels. 
+         * Sets the number of available audio channels.
          *
          * @access public
          * @author Oliver Lillie
          * @param integer $channels One of the following integers; 0, 1, 2, 6.
-         * @return PHPVideoToolkit\AudioFormat Returns the current object.
+         * @return \PHPVideoToolkit\AudioFormat $this Returns the current object.
          * @throws \InvalidArgumentException If $channels value is not an integer.
          * @throws \InvalidArgumentException If $channels value is not one of the allowed values.
          */
@@ -318,7 +318,7 @@
                 $this->_format['audio_channels'] = null;
                 return $this;
             }
-            
+
             if(is_int($channels) === false)
             {
                 throw new \InvalidArgumentException('The channels value must be an integer.');
@@ -331,7 +331,7 @@
             $this->_format['audio_channels'] = $channels;
             return $this;
         }
-        
+
         /**
          * Sets the audio streams volumn level.
          *
@@ -349,7 +349,7 @@
                 $this->_format['audio_volume'] = null;
                 return $this;
             }
-            
+
             if(is_int($volume) === false)
             {
                 throw new \InvalidArgumentException('The volumne value must be an integer.');
@@ -358,11 +358,11 @@
             {
                 throw new \InvalidArgumentException('Unrecognised volume value "'.$volume.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVolume. The value must be higher than or equal to 0.');
             }
-            
+
             $this->_format['audio_volume'] = $volume;
             return $this;
         }
-        
+
         /**
          * Sets the audio quality on a 0-100 scale.
          *
@@ -376,7 +376,7 @@
         public function setAudioQuality($quality)
         {
             $this->_blockSetOnInputFormat('audio quality');
-            
+
             if($quality === null)
             {
                 $this->_format['audio_quality'] = null;
@@ -386,14 +386,14 @@
             {
                 throw new \InvalidArgumentException('The volume value must be an integer or float value.');
             }
-            
+
 //          interpret quality into ffmpeg value
             $quality = 31 - round(($quality / 100) * 31);
             if($quality > 31 || $quality < 1)
             {
                 throw new \InvalidArgumentException('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioQuality. The quality value must be between 0 and 100.');
             }
-            
+
             $this->_format['audio_quality'] = $quality;
             return $this;
         }
