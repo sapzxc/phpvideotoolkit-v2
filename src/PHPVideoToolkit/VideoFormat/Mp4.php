@@ -23,6 +23,10 @@
         protected $_post_process_qt_faststart;
         protected $_enforce_qt_faststart_success;
 
+        /**
+         * @param constant|string $input_output_type
+         * @param Config $config
+         */
         public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($input_output_type, $config);
@@ -57,12 +61,17 @@
         {
             $this->_enforce_qt_faststart_success = false;
         }
-        
+
         public function forceQtFastStartSuccess()
         {
             $this->_enforce_qt_faststart_success = true;
         }
 
+        /**
+         * @param string $save_path
+         * @param constant $overwrite
+         * @return $this
+         */
         public function updateFormatOptions(&$save_path, $overwrite)
         {
             parent::updateFormatOptions($save_path, $overwrite);
@@ -84,6 +93,7 @@
          * @author Oliver Lillie
          * @param Media $media 
          * @return Media
+         * @throws FfmpegProcessPostProcessException
          */
         public function postProcessFastStart(Media $media)
         {

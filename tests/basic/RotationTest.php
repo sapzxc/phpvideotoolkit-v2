@@ -25,7 +25,7 @@ class RotationTest extends VideoTestAbstraction
 		$dstFile = TESTS_TMP_DIR.'simple.mp4';
 		$res = $this->basicConvert($this->sourceFilePath, $dstFile);
 
-//		echo "CommandString: ".$res->getCommandString()."\n";
+		echo "\n".__METHOD__."\tCommandString: ".$res->getCommandString()."\n";
 //		echo "Output: ".serialize($res->getOutput())."\n";
 
 		$this->assertFalse($res->hasError(), "Conversion error: ".serialize($res->getMessages()));
@@ -49,7 +49,7 @@ class RotationTest extends VideoTestAbstraction
 		$dstFile = TESTS_TMP_DIR.'rotated90.mp4';
 		$res = $this->basicConvert($this->sourceFilePath, $dstFile, 90);
 
-		echo "CommandString: ".$res->getCommandString()."\n";
+		echo "\n".__METHOD__."\tCommandString: ".$res->getCommandString()."\n";
 //		echo "Output: ".serialize($res->getOutput())."\n";
 
 		$this->assertFalse($res->hasError(), "Conversion error: ".serialize($res->getMessages()));
@@ -72,6 +72,58 @@ class RotationTest extends VideoTestAbstraction
 		$this->assertEquals($srcDimensions, $dstDimensions);
 	}
 
+	public function testRotation270()
+	{
+		$dstFile = TESTS_TMP_DIR.'rotated270.mp4';
+		$res = $this->basicConvert($this->sourceFilePath, $dstFile, 90);
+
+		echo "\n".__METHOD__."\tCommandString: ".$res->getCommandString()."\n";
+//		echo "Output: ".serialize($res->getOutput())."\n";
+
+		$this->assertFalse($res->hasError(), "Conversion error: ".serialize($res->getMessages()));
+
+		$this->assertFileExists($dstFile, "Dst file does not exists");
+
+		$this->assertGreaterThan(0, filesize($dstFile), "Output file empty");
+
+		// check dimensions
+		$srcVideo = new \PHPVideoToolkit\Video($this->sourceFilePath, $this->toolkitConfig);
+		$srcDimensions = $srcVideo->readDimensions(false);
+
+		$dstVideo = new \PHPVideoToolkit\Video($dstFile, $this->toolkitConfig);
+		$dstDimensions = $dstVideo->readDimensions(false);
+		//swap width and height for dst and then assert
+		$w=$dstDimensions['width'];
+		$dstDimensions['width'] = $dstDimensions['height'];
+		$dstDimensions['height'] = $w;
+
+		$this->assertEquals($srcDimensions, $dstDimensions);
+	}
+
+	public function testRotation180()
+	{
+		$dstFile = TESTS_TMP_DIR.'rotated180.mp4';
+		$res = $this->basicConvert($this->sourceFilePath, $dstFile, 90);
+
+		echo "\n".__METHOD__."\tCommandString: ".$res->getCommandString()."\n";
+//		echo "Output: ".serialize($res->getOutput())."\n";
+
+		$this->assertFalse($res->hasError(), "Conversion error: ".serialize($res->getMessages()));
+
+		$this->assertFileExists($dstFile, "Dst file does not exists");
+
+		$this->assertGreaterThan(0, filesize($dstFile), "Output file empty");
+
+		// check dimensions
+		$srcVideo = new \PHPVideoToolkit\Video($this->sourceFilePath, $this->toolkitConfig);
+		$srcDimensions = $srcVideo->readDimensions(false);
+
+		$dstVideo = new \PHPVideoToolkit\Video($dstFile, $this->toolkitConfig);
+		$dstDimensions = $dstVideo->readDimensions(false);
+
+		$this->assertEquals($srcDimensions, $dstDimensions);
+	}
+
 	/**
 	 * @param $srcFile
 	 * @param $dstFile
@@ -85,7 +137,7 @@ class RotationTest extends VideoTestAbstraction
 		$outputFormat
 			->setVideoCodec('libx264')
 			->setVideoBitrate('2500k')
-			->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_HD720, null, true)
+			->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_HD720)
 
 			->setAudioCodec('aac')
 			->setAudioBitrate('96k')

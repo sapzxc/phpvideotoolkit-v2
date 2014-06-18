@@ -717,6 +717,7 @@
 //          set the input files.
             $this->_process->setInputPath($this->_media_file_path);
 
+//FIXME why here used loop constructed from one iteration?
 //          loop and process the save path to multioutput so we can loop
             $multi_output = $this->_convertOutputPathToMultiOutput($save_path, $output_format);
             $index = 0;
@@ -1081,6 +1082,8 @@
          * @access protected
          * @author Oliver Lillie
          * @param Format &$output_format
+         * @param string &$save_path
+         * @param bool $overwrite
          * @return void
          */
         protected function _processOutputFormat(Format &$output_format=null, &$save_path, $overwrite)

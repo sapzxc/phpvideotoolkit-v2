@@ -240,8 +240,8 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param PHPVideoToolkit\Media $media 
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @param \PHPVideoToolkit\Media $media
+         * @return \PHPVideoToolkit\Format $this Returns the current object.
          */
         public function setMedia(Media $media)
         {
@@ -275,7 +275,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @param string &$save_path
+         * @param bool $overwrite
+         * @return \PHPVideoToolkit\Format $this Returns the current object.
          * @throws \LogicException If the media object has not yet been set into the current format object.
          */
         public function updateFormatOptions(&$save_path, $overwrite)

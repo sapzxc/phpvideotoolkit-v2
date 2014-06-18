@@ -14,9 +14,9 @@
     namespace PHPVideoToolkit;
 
     /**
-     * @access public
+     * Class VideoFormat
      * @author Oliver Lillie
-     * @package default
+     * @package PHPVideoToolkit
      */
     class VideoFormat extends AudioFormat
     {
@@ -105,7 +105,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @param &$save_path
+         * @param $overwrite
+         * @return $this
          */
         public function updateFormatOptions(&$save_path, $overwrite)
         {
@@ -182,7 +184,8 @@
          * @access public
          * @author Oliver Lillie
          * @param VideoFilter $filter
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function addVideoFilter(VideoFilter $filter)
         {
@@ -203,7 +206,7 @@
          */
         public function enableTwoPassEncoding()
         {
-
+            //TODO
         }
 
         /**
@@ -211,7 +214,8 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function disableVideo()
         {
@@ -230,7 +234,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return $this
          */
         public function enableVideo()
         {
@@ -246,6 +250,7 @@
          * @author Oliver Lillie
          * @param string $video_codec
          * @return $this
+         * @throws Exception
          */
         public function setVideoCodec($video_codec)
         {
@@ -301,11 +306,12 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $width
-         * @param string $height
-         * @param string $auto_adjust_dimensions_to_optimal
-         * @param string $force_aspect_ratio
+         * @param mixed $width
+         * @param int|null $height
+         * @param bool $auto_adjust_dimensions_to_optimal
+         * @param bool $force_aspect_ratio
          * @return $this
+         * @throws Exception
          */
         public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=false, $force_aspect_ratio=false)
         {
@@ -317,36 +323,37 @@
 
             if($height === null)
             {
-                if(in_array($width, array(self::DIMENSION_SAME_AS_SOURCE, self::DIMENSION_SQCIF, self::DIMENSION_QCIF, self::DIMENSION_CIF, self::DIMENSION_4CIF, self::DIMENSION_QQVGA, self::DIMENSION_QVGA, self::DIMENSION_VGA, self::DIMENSION_SVGA, self::DIMENSION_XGA, self::DIMENSION_UXGA, self::DIMENSION_QXGA, self::DIMENSION_SXGA, self::DIMENSION_QSXGA, self::DIMENSION_HSXGA, self::DIMENSION_WVGA, self::DIMENSION_WXGA, self::DIMENSION_WSXGA, self::DIMENSION_WUXGA, self::DIMENSION_WOXGA, self::DIMENSION_WQSXGA, self::DIMENSION_WQUXGA, self::DIMENSION_WHSXGA, self::DIMENSION_WHUXGA, self::DIMENSION_CGA, self::DIMENSION_EGA, self::DIMENSION_HD480, self::DIMENSION_HD720, self::DIMENSION_HD1080)) === false)
-                {
-					///FIXME make exception description
-                    throw new Exception();
-                }
+//@deprecated checking each dimensions not need, because we have another checks below and programmer can point some special dimensions
+// that recognized by ffmpeg but not allowed in this condition
+//                if(in_array($width, array(self::DIMENSION_SAME_AS_SOURCE, self::DIMENSION_SQCIF, self::DIMENSION_QCIF, self::DIMENSION_CIF, self::DIMENSION_4CIF, self::DIMENSION_QQVGA, self::DIMENSION_QVGA, self::DIMENSION_VGA, self::DIMENSION_SVGA, self::DIMENSION_XGA, self::DIMENSION_UXGA, self::DIMENSION_QXGA, self::DIMENSION_SXGA, self::DIMENSION_QSXGA, self::DIMENSION_HSXGA, self::DIMENSION_WVGA, self::DIMENSION_WXGA, self::DIMENSION_WSXGA, self::DIMENSION_WUXGA, self::DIMENSION_WOXGA, self::DIMENSION_WQSXGA, self::DIMENSION_WQUXGA, self::DIMENSION_WHSXGA, self::DIMENSION_WHUXGA, self::DIMENSION_CGA, self::DIMENSION_EGA, self::DIMENSION_HD480, self::DIMENSION_HD720, self::DIMENSION_HD1080)) === false)
+//                {
+//                    ///FIXME make exception description
+//                    throw new Exception();
+//                }
 
 //              if we have the same as source dimensions...
                 if($width === self::DIMENSION_SAME_AS_SOURCE)
                 {
+                    ///TODO use constant, not magic string
                     $this->_format['video_dimensions'] = 'sas';
                     return $this;
                 }
-                else
+                elseif(strpos($width, 'x') > 0)
                 {
                     $parts = explode('x', $width);
-                    $width = (int) $parts[0];
-                    $height = (int) $parts[1];
+                    $width = $parts[0];
+                    $height = $parts[1];
                 }
             }
-            else
-            {
-                $width = (int) $width;
-                $height = (int) $height;
-            }
 
-            if(empty($width) === true || $width <= 0)
+            $width = (int) $width;
+            $height = (int) $height;
+
+            if($width <= 0)
             {
                 throw new Exception('Unrecognised width dimension "'.$width.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
             }
-            if(empty($height) === true || $height <= 0)
+            if($height <= 0)
             {
                 throw new Exception('Unrecognised height dimension "'.$height.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
             }
@@ -365,9 +372,10 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $width
-         * @param string $height
-         * @return void
+         * @param null $width
+         * @param null $height
+         * @return $this
+         * @throws Exception
          */
         public function setVideoScale($width, $height)
         {
@@ -410,7 +418,7 @@
          * @param string $width
          * @param string $height
          * @param string $colour
-         * @return void
+         * @return $this
          */
         public function setVideoPadding($top, $right, $bottom, $left, $width=null, $height=null, $colour='black')
         {
@@ -471,8 +479,9 @@
          * @access public
          * @author Oliver Lillie
          * @param string $aspect_ratio
-         * @param string $auto_adjust_dimensions
-         * @return void
+         * @param bool $auto_adjust_dimensions
+         * @return $this
+         * @throws Exception
          */
         public function setVideoAspectRatio($aspect_ratio, $auto_adjust_dimensions=false)
         {
@@ -502,7 +511,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $frame_rate
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setVideoFrameRate($frame_rate)
         {
@@ -541,7 +551,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $max_frame_count
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setVideoMaxFrames($max_frame_count)
         {
@@ -568,6 +579,7 @@
          * @author Oliver Lillie
          * @param string $bitrate
          * @return $this
+         * @throws Exception
          */
         public function setVideoBitrate($bitrate)
         {
@@ -604,7 +616,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $pixel_format
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setVideoPixelFormat($pixel_format)
         {
@@ -617,7 +630,7 @@
 //          now check the class settings to see if restricted pixel formats have been set and have to be obeyed
             if($this->_restricted_video_pixel_formats !== null)
             {
-                if(in_array($video_codec, $this->_restricted_video_pixel_formats) === false)
+                if(in_array($pixel_format, $this->_restricted_video_pixel_formats) === false)
                 {
                     throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
                 }
@@ -639,7 +652,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $quality
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setVideoQuality($quality)
         {
@@ -662,14 +676,14 @@
             return $this;
         }
 
-		/**
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param null|bool|int $rotation
-		 * @return $this
-		 * @throws Exception
-		 */
-		public function setVideoRotation($rotation)
+        /**
+         * @access public
+         * @author Oliver Lillie
+         * @param null|bool|int $rotation
+         * @return $this
+         * @throws Exception
+         */
+        public function setVideoRotation($rotation)
         {
             $this->_blockSetOnInputFormat('video rotation');
 
@@ -692,9 +706,9 @@
                 return $this;
             }
 
-			// normalize angle
-			$rotationSimplified = $rotation % 360;
-			while($rotationSimplified < 0){ $rotationSimplified+=360; }
+            // normalize angle
+            $rotationSimplified = $rotation % 360;
+            while($rotationSimplified < 0){ $rotationSimplified+=360; }
 
 //          otherwise accept only the following integers.
             if(in_array($rotationSimplified, array(0, 90, 180, 270)) === false)
@@ -702,28 +716,28 @@
                 throw new Exception('Unrecognised rotation "'.$rotation.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoRotation');
             }
 
-//			@see https://www.ffmpeg.org/ffmpeg-filters.html#transpose
+//          @see https://www.ffmpeg.org/ffmpeg-filters.html#transpose
 //          get the transpose code. Note that we can't transpose 180 degrees, for that we must perform flips
-			switch($rotation)
-			{
-				case 0:
-					$this->_format['video_rotation'] = null;
-					break;
-				case 90:
-					// transponse = 1 -> Rotate by 90 degrees clockwise
-					$this->_format['video_rotation'] = 1;
-					break;
-				case 180:
-					//NOTE Thinking about using native transponse=3(clock_flip) ?
-					$this->_format['video_rotation'] = null;
-					$this->videoFlipVertical();
-					$this->videoFlipHorizontal();
-					break;
-				case 270:
-					// transponse = 2 -> Rotate by 90 degrees counterclockwise
-					$this->_format['video_rotation'] = 2;
-					break;
-			}
+            switch($rotation)
+            {
+                case 0:
+                    $this->_format['video_rotation'] = null;
+                    break;
+                case 90:
+                    // transponse = 1 -> Rotate by 90 degrees clockwise
+                    $this->_format['video_rotation'] = 1;
+                    break;
+                case 180:
+                    //NOTE Thinking about using native transponse=3(clock_flip) ?
+                    $this->_format['video_rotation'] = null;
+                    $this->videoFlipVertical();
+                    $this->videoFlipHorizontal();
+                    break;
+                case 270:
+                    // transponse = 2 -> Rotate by 90 degrees counterclockwise
+                    $this->_format['video_rotation'] = 2;
+                    break;
+            }
 
             return $this;
         }
@@ -733,7 +747,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return $this
          */
         public function videoFlipVertical()
         {
@@ -756,7 +770,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return $this
          */
         public function videoFlipHorizontal()
         {

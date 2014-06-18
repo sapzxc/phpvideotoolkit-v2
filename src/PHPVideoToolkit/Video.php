@@ -60,6 +60,11 @@
             return $this;
         }
 
+        /**
+         * @param Timecode $timecode
+         * @return $this
+         * @throws Exception
+         */
         public function extractFrame(Timecode $timecode)
         {
             if($this->_extracting_frames === true)
@@ -73,6 +78,13 @@
             return $this;
         }
 
+        /**
+         * @param Timecode $from_timecode
+         * @param Timecode $to_timecode
+         * @param null $force_frame_rate
+         * @return $this
+         * @throws Exception
+         */
         public function extractFrames(Timecode $from_timecode=null, Timecode $to_timecode=null, $force_frame_rate=null)
         {
             if($this->_extracting_frame === true)
@@ -93,6 +105,12 @@
             return $this;
         }
 
+        /**
+         * @param Format $output_format
+         * @param string $save_path
+         * @param string $overwrite
+         * @param ProgressHandlerAbstract $progress_handler
+         */
         protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
         {
             parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
@@ -123,11 +141,14 @@
 
         /**
          * Process the output format just before the it is compiled into commands.
-         *
+
          * @access public
          * @author Oliver Lillie
-         * @param Format &$output_format
-         * @return void
+         * @param Format|null &$output_format
+         * @param string &$save_path
+         * @param bool $overwrite
+         * @return $this
+         * @throws Exception
          */
         protected function _processOutputFormat(Format &$output_format=null, &$save_path, $overwrite)
         {
