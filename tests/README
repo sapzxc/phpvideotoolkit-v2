@@ -1,0 +1,8 @@
+To run tests install phpunit, follow instructions:
+http://phpunit.de/manual/4.1/en/installation.html#installation.composer
+
+Main thing:
+$ composer global require "phpunit/phpunit=4.1.*"
+
+Then run tests point directory that should be tested:
+$ cd /path/to/tests/ && phpunit .
