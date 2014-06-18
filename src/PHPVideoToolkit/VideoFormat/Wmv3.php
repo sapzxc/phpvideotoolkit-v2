@@ -18,7 +18,7 @@
      * @author Oliver Lillie
      * @package default
      */
-    class VideoFormat_Wmv extends VideoFormat
+    class VideoFormat_Wmv3 extends VideoFormat
     {
         public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
