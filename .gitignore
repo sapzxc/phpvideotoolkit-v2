@@ -6,3 +6,4 @@ vendor
 examples/output/*
 examples/tmp/*
 .idea
+composer.lock
